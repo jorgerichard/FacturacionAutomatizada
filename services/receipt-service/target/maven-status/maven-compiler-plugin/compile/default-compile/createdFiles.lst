@@ -1,0 +1,7 @@
+com\businessflow\receipt\model\Receipt.class
+com\businessflow\receipt\controller\ReceiptController.class
+com\businessflow\receipt\HealthController.class
+com\businessflow\receipt\integration\RabbitEventPublisher.class
+com\businessflow\receipt\service\ReceiptService.class
+com\businessflow\receipt\integration\BillingIntegrationClient.class
+com\businessflow\receipt\ReceiptServiceApplication.class

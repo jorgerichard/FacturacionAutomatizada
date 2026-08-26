@@ -1,0 +1,6 @@
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\controller\ReceiptController.java
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\integration\BillingIntegrationClient.java
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\integration\RabbitEventPublisher.java
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\model\Receipt.java
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\ReceiptServiceApplication.java
+C:\Users\PC\businessflow\services\receipt-service\src\main\java\com\businessflow\receipt\service\ReceiptService.java

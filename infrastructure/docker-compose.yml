@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: businessflow
+      MYSQL_USER: businessflow
+      MYSQL_PASSWORD: businessflow
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - '3311:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    ports:
+      - '6379:6379'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+  admin-server:
+    image: ghcr.io/codecentric/spring-boot-admin:latest
+    ports:
+      - '9090:9090'
+
+volumes:
+  mysql_data:

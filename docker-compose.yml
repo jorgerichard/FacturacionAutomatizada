@@ -1,0 +1,294 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: businessflow-mysql
+    environment:
+      MYSQL_DATABASE: businessflow
+      MYSQL_USER: businessflow
+      MYSQL_PASSWORD: businessflow
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: businessflow-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: businessflow-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: businessflow-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - eureka-server
+      - node-exporter
+      - redis-exporter
+      - rabbitmq-exporter
+      - cadvisor
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: businessflow-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: businessflow-node-exporter
+    ports:
+      - "9100:9100"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: businessflow-cadvisor
+    ports:
+      - "8086:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: businessflow-redis-exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter:latest
+    container_name: businessflow-rabbitmq-exporter
+    environment:
+      RABBIT_URL: http://rabbitmq:15672
+      RABBIT_USER: guest
+      RABBIT_PASSWORD: guest
+    ports:
+      - "9419:9419"
+    depends_on:
+      - rabbitmq
+
+  eureka-server:
+    build:
+      context: ./services/eureka-server
+    container_name: businessflow-eureka
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  admin-server:
+    build:
+      context: ./services/admin-server
+    container_name: businessflow-admin
+    ports:
+      - "9090:9090"
+    depends_on:
+      eureka-server:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9090/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  gateway-service:
+    build:
+      context: ./services/gateway-service
+    container_name: businessflow-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+      receipt-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  bff-service:
+    build:
+      context: ./services/bff-service
+    container_name: businessflow-bff
+    ports:
+      - "8090:8090"
+    depends_on:
+      auth-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8090/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: businessflow-auth
+    ports:
+      - "8081:8081"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  customer-service:
+    build:
+      context: ./services/customer-service
+    container_name: businessflow-customer
+    ports:
+      - "8082:8082"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+    container_name: businessflow-catalog
+    ports:
+      - "8083:8083"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  billing-service:
+    build:
+      context: ./services/billing-service
+    container_name: businessflow-billing
+    ports:
+      - "8084:8084"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8084/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  receipt-service:
+    build:
+      context: ./services/receipt-service
+    container_name: businessflow-receipt
+    ports:
+      - "8087:8087"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8087/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: businessflow-backend
+    ports:
+      - "8085:8085"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:

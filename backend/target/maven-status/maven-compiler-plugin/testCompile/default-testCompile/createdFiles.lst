@@ -1,0 +1,7 @@
+com\businessflow\controller\DashboardControllerTest.class
+com\businessflow\controller\CustomerControllerTest.class
+com\businessflow\controller\InvoiceControllerTest.class
+com\businessflow\service\CustomerServicePersistenceTest.class
+com\businessflow\controller\ProductControllerTest.class
+com\businessflow\controller\InventoryControllerTest.class
+com\businessflow\controller\QuotationControllerTest.class
