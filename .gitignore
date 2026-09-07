@@ -1,0 +1,23 @@
+# Maven
+target/
+**/target/
+
+# Java
+*.class
+*.jar
+*.war
+
+# Visual Studio Code
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Registros y variables privadas
+*.log
+.env

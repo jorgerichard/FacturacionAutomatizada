@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -29,6 +30,11 @@ public class CustomerController {
     @GetMapping
     public List<CustomerResponse> listCustomers() {
         return customerService.listCustomers();
+    }
+
+    @GetMapping("/{id}")
+    public Optional<CustomerResponse> getCustomer(@PathVariable Long id) {
+        return customerService.getCustomer(id);
     }
 
     @PostMapping

@@ -77,3 +77,18 @@ businessflow/
    ```
 
 La app seguirá usando H2 por defecto si no se especifica el perfil `mysql`.
+
+## Enviar boletas por correo
+
+Al crear una boleta, `receipt-service` consulta el email del cliente y envía un comprobante HTML por SMTP. Para activarlo, define estas variables antes de levantar Docker Compose:
+
+```powershell
+$env:SMTP_HOST = "smtp.gmail.com"
+$env:SMTP_PORT = "587"
+$env:SMTP_USERNAME = "tu-cuenta@gmail.com"
+$env:SMTP_PASSWORD = "tu-clave-de-aplicacion"
+$env:SMTP_FROM = "tu-cuenta@gmail.com"
+docker compose up -d --build receipt-service
+```
+
+`SMTP_PASSWORD` debe ser una clave de aplicación del proveedor, no la contraseña personal. Si `SMTP_HOST` queda vacío, la boleta se crea normalmente pero no se intenta enviar correo.

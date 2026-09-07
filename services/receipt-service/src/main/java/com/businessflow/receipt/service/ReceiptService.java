@@ -2,6 +2,7 @@ package com.businessflow.receipt.service;
 
 import com.businessflow.receipt.model.Receipt;
 import com.businessflow.receipt.integration.BillingIntegrationClient;
+import com.businessflow.receipt.integration.CustomerIntegrationClient;
 import com.businessflow.receipt.integration.RabbitEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,18 @@ import java.util.stream.Collectors;
 public class ReceiptService {
     private final Map<String, Receipt> storage = new ConcurrentHashMap<>();
     private final BillingIntegrationClient billingIntegrationClient;
+    private final CustomerIntegrationClient customerIntegrationClient;
     private final RabbitEventPublisher rabbitEventPublisher;
+    private final ReceiptEmailService receiptEmailService;
 
-    public ReceiptService(BillingIntegrationClient billingIntegrationClient, RabbitEventPublisher rabbitEventPublisher) {
+    public ReceiptService(BillingIntegrationClient billingIntegrationClient,
+                          CustomerIntegrationClient customerIntegrationClient,
+                          RabbitEventPublisher rabbitEventPublisher,
+                          ReceiptEmailService receiptEmailService) {
         this.billingIntegrationClient = billingIntegrationClient;
+        this.customerIntegrationClient = customerIntegrationClient;
         this.rabbitEventPublisher = rabbitEventPublisher;
+        this.receiptEmailService = receiptEmailService;
     }
 
     public Receipt create(Receipt receipt) {
@@ -32,6 +40,7 @@ public class ReceiptService {
         }
 
         rabbitEventPublisher.publishReceiptCreated(receipt);
+        receiptEmailService.send(receipt, customerIntegrationClient.findById(receipt.getCustomerId()));
         return receipt;
     }
 

@@ -8,6 +8,7 @@ import com.businessflow.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
@@ -22,6 +23,10 @@ public class CustomerService {
         return customerRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    public Optional<CustomerResponse> getCustomer(Long id) {
+        return customerRepository.findById(id).map(this::toResponse);
     }
 
     public CustomerResponse createCustomer(CustomerCreateRequest request) {

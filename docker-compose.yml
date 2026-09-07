@@ -265,6 +265,15 @@ services:
     container_name: businessflow-receipt
     ports:
       - "8087:8087"
+    environment:
+      CUSTOMER_SERVICE_URL: ${CUSTOMER_SERVICE_URL:-http://backend:8085}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
     depends_on:
       eureka-server:
         condition: service_started
