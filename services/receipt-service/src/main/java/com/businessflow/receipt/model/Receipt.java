@@ -7,6 +7,7 @@ public class Receipt {
     private String id;
     private String invoiceId;
     private String customerId;
+    private String customerName;
     private double amount;
     private String currency;
     private String status;
@@ -36,6 +37,8 @@ public class Receipt {
     public void setInvoiceId(String invoiceId) { this.invoiceId = invoiceId; }
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
     public String getCurrency() { return currency; }
