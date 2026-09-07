@@ -12,12 +12,18 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitInvoiceConfig {
 
     public static final String BILLING_EXCHANGE = "billing-events";
+    public static final String RECEIPT_EXCHANGE = "receipt-events";
     public static final String INVOICE_CREATED_QUEUE = "receipt.invoice.created.queue";
     public static final String INVOICE_CREATED_ROUTING_KEY = "invoice.created";
 
     @Bean
     public TopicExchange billingExchange() {
         return new TopicExchange(BILLING_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public TopicExchange receiptEventsExchange() {
+        return new TopicExchange(RECEIPT_EXCHANGE, true, false);
     }
 
     @Bean
