@@ -7,6 +7,25 @@ target/
 *.jar
 *.war
 
+# Node / Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+**/coverage/
+
+# Variables privadas y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Archivos temporales de pruebas locales
+temp-*
+*.tmp
+
 # Visual Studio Code
 .vscode/
 
@@ -18,6 +37,5 @@ target/
 .DS_Store
 Thumbs.db
 
-# Registros y variables privadas
+# Registros
 *.log
-.env
