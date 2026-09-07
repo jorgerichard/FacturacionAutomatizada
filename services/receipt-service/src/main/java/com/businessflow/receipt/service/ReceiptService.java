@@ -40,7 +40,28 @@ public class ReceiptService {
         }
 
         rabbitEventPublisher.publishReceiptCreated(receipt);
-        receiptEmailService.send(receipt, customerIntegrationClient.findById(receipt.getCustomerId()));
+        if (receipt.getCustomerId() != null && !receipt.getCustomerId().isBlank()) {
+            receiptEmailService.send(receipt, customerIntegrationClient.findById(receipt.getCustomerId()));
+        }
+        return receipt;
+    }
+
+    public Receipt createFromInvoiceEvent(String invoiceId,
+                                          String invoiceNumber,
+                                          String customerName,
+                                          double amount,
+                                          String currency) {
+        Receipt receipt = new Receipt(
+                invoiceId,
+                null,
+                amount,
+                currency == null || currency.isBlank() ? "CLP" : currency,
+                "Generado automaticamente desde factura " + invoiceNumber
+        );
+        receipt.setCustomerName(customerName);
+        receipt.setStatus("VALIDATED");
+        storage.put(receipt.getId(), receipt);
+        rabbitEventPublisher.publishReceiptCreated(receipt);
         return receipt;
     }
 
