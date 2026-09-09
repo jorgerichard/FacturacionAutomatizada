@@ -270,7 +270,7 @@ services:
     ports:
       - "8087:8087"
     environment:
-      CUSTOMER_SERVICE_URL: ${CUSTOMER_SERVICE_URL:-http://backend:8085}
+      CUSTOMER_SERVICE_URL: ${CUSTOMER_SERVICE_URL:-http://customer-service:8082}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
@@ -280,6 +280,8 @@ services:
       SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
     depends_on:
       eureka-server:
+        condition: service_started
+      customer-service:
         condition: service_started
       redis:
         condition: service_started
