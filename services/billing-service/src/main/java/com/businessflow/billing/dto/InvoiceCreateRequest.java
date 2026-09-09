@@ -1,4 +1,4 @@
 package com.businessflow.billing.dto;
 
-public record InvoiceCreateRequest(String customerName, Double total) {
+public record InvoiceCreateRequest(Long customerId, Double total) {
 }
