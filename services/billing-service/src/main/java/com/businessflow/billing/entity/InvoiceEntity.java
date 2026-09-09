@@ -14,6 +14,7 @@ public class InvoiceEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long customerId;
     private String customerName;
     private String number;
     private String status;
@@ -24,7 +25,8 @@ public class InvoiceEntity {
     public InvoiceEntity() {
     }
 
-    public InvoiceEntity(String customerName, String number, String status, Double total, String paymentStatus, String dueDate) {
+    public InvoiceEntity(Long customerId, String customerName, String number, String status, Double total, String paymentStatus, String dueDate) {
+        this.customerId = customerId;
         this.customerName = customerName;
         this.number = number;
         this.status = status;
@@ -34,6 +36,7 @@ public class InvoiceEntity {
     }
 
     public Long getId() { return id; }
+    public Long getCustomerId() { return customerId; }
     public String getCustomerName() { return customerName; }
     public String getNumber() { return number; }
     public String getStatus() { return status; }
@@ -41,6 +44,7 @@ public class InvoiceEntity {
     public String getPaymentStatus() { return paymentStatus; }
     public String getDueDate() { return dueDate; }
 
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
     public void setTotal(Double total) { this.total = total; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
