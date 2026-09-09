@@ -2,6 +2,7 @@ package com.businessflow.billing.dto;
 
 public record InvoiceResponse(
         Long id,
+        Long customerId,
         String customerName,
         String number,
         String status,
