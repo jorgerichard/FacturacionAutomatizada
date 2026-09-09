@@ -141,6 +141,8 @@ services:
     build:
       context: ./services/gateway-service
     container_name: businessflow-gateway
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-businessflow-local-development-jwt-secret-change-me-2026}
     ports:
       - "8080:8080"
     depends_on:
@@ -187,6 +189,8 @@ services:
     build:
       context: ./services/auth-service
     container_name: businessflow-auth
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-businessflow-local-development-jwt-secret-change-me-2026}
     ports:
       - "8081:8081"
     depends_on:
