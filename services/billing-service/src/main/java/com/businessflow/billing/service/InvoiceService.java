@@ -5,6 +5,7 @@ import com.businessflow.billing.dto.InvoiceResponse;
 import com.businessflow.billing.dto.InvoiceStatusUpdateRequest;
 import com.businessflow.billing.dto.PaymentStatusUpdateRequest;
 import com.businessflow.billing.entity.InvoiceEntity;
+import com.businessflow.billing.integration.CustomerIntegrationClient;
 import com.businessflow.billing.integration.InvoiceEventPublisher;
 import com.businessflow.billing.repository.InvoiceRepository;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,14 @@ public class InvoiceService {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final InvoiceRepository invoiceRepository;
     private final InvoiceEventPublisher invoiceEventPublisher;
+    private final CustomerIntegrationClient customerIntegrationClient;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, InvoiceEventPublisher invoiceEventPublisher) {
+    public InvoiceService(InvoiceRepository invoiceRepository,
+                          InvoiceEventPublisher invoiceEventPublisher,
+                          CustomerIntegrationClient customerIntegrationClient) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceEventPublisher = invoiceEventPublisher;
+        this.customerIntegrationClient = customerIntegrationClient;
     }
 
     public List<InvoiceResponse> listInvoices() {
@@ -35,9 +40,11 @@ public class InvoiceService {
 
     public InvoiceResponse createInvoice(InvoiceCreateRequest request) {
         validateInvoice(request);
+        CustomerIntegrationClient.Customer customer = customerIntegrationClient.findById(request.customerId());
         String number = String.format("FAC-%05d", invoiceRepository.count() + 1);
         InvoiceEntity entity = new InvoiceEntity(
-                request.customerName().trim(),
+                customer.id(),
+                customer.name(),
                 number,
                 "Pendiente",
                 request.total(),
@@ -52,8 +59,10 @@ public class InvoiceService {
 
     public InvoiceResponse updateInvoice(Long id, InvoiceCreateRequest request) {
         validateInvoice(request);
+        CustomerIntegrationClient.Customer customer = customerIntegrationClient.findById(request.customerId());
         InvoiceEntity entity = findById(id);
-        entity.setCustomerName(request.customerName().trim());
+        entity.setCustomerId(customer.id());
+        entity.setCustomerName(customer.name());
         entity.setTotal(request.total());
         entity.setDueDate(LocalDate.now().plusDays(15).format(DATE_FORMAT));
         return toResponse(invoiceRepository.save(entity));
@@ -88,8 +97,8 @@ public class InvoiceService {
     }
 
     private void validateInvoice(InvoiceCreateRequest request) {
-        if (request == null || request.customerName() == null || request.customerName().isBlank()) {
-            throw new IllegalArgumentException("El nombre del cliente es obligatorio");
+        if (request == null || request.customerId() == null || request.customerId() <= 0) {
+            throw new IllegalArgumentException("El customerId es obligatorio");
         }
         if (request.total() == null || request.total() <= 0) {
             throw new IllegalArgumentException("El total debe ser mayor que cero");
@@ -99,6 +108,7 @@ public class InvoiceService {
     private InvoiceResponse toResponse(InvoiceEntity entity) {
         return new InvoiceResponse(
                 entity.getId(),
+                entity.getCustomerId(),
                 entity.getCustomerName(),
                 entity.getNumber(),
                 entity.getStatus(),
