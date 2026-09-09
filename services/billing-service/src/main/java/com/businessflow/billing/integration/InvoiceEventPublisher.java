@@ -26,6 +26,7 @@ public class InvoiceEventPublisher {
         payload.put("eventType", "INVOICE_CREATED");
         payload.put("invoiceId", invoice.getId());
         payload.put("invoiceNumber", invoice.getNumber());
+        payload.put("customerId", invoice.getCustomerId());
         payload.put("customerName", invoice.getCustomerName());
         payload.put("total", invoice.getTotal());
         payload.put("currency", "CLP");
@@ -38,6 +39,6 @@ public class InvoiceEventPublisher {
                 payload
         );
 
-        log.info("[RabbitMQ] invoice.created -> {}", invoice.getNumber());
+        log.info("[RabbitMQ] invoice.created -> {} customerId={}", invoice.getNumber(), invoice.getCustomerId());
     }
 }
